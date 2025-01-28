@@ -348,4 +348,4 @@ axs[1][1].text(-1.25,0.365,'d)', weight='bold', fontsize='large')
 
 plt.tight_layout()
 
-plt.savefig('Figure 6 (seaborn)_censored.pdf')
+plt.savefig('Figure 4.pdf')

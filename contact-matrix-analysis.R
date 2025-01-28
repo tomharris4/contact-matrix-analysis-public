@@ -173,7 +173,7 @@ country_labels[25] <- "Zimbabwe, 2013"
 ## Output per capita rates before processing
 for (cm in seq(1,length(proxy_contact_matrices))){
   file_name <- paste(country_labels[cm],' per capita.csv',sep='')
-  write.csv(proxy_contact_matrices[[cm]]$matrix.per.capita,file_name)
+  # write.csv(proxy_contact_matrices[[cm]]$matrix.per.capita,file_name)
 }
 
 

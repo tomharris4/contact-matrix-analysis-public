@@ -127,4 +127,4 @@ axs.axvline(g1+g2+g3-0.025, ymin=(g1+g2)/total, ymax=((g1+g2+g3)/total),linestyl
 
 
 plt.tight_layout()
-# plt.savefig('Figure 2 (seaborn).pdf')
+plt.savefig('Figure 1.pdf')

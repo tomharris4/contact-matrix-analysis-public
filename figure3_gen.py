@@ -177,4 +177,4 @@ axs[1][1].text(-11,-3.25,'Age of Participant (years)', weight='bold', fontsize='
 axs[0][0].text(-3.25,-8.5,'Age of Contact (years)', weight='bold', fontsize='x-large',rotation=90)
 
 
-plt.savefig('Figure 5 (seaborn)_censored.pdf')
+plt.savefig('Figure 3.pdf')

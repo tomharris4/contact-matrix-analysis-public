@@ -298,4 +298,4 @@ axs[3][2].text(-2,15.5,'l)', weight='bold', fontsize='xx-large')
 axs[3][1].text(-2,-4.5,'Age of Participant (years)', weight='bold', fontsize='xx-large')
 axs[1][0].text(-4.5,-10,'Age of Contact (years)', weight='bold', fontsize='xx-large',rotation=90)
 
-# plt.savefig('Figure 3_.pdf')
+plt.savefig('Figure 2.pdf')

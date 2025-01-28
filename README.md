@@ -1,6 +1,6 @@
-# Apparent structural changes in contact patterns during COVID-19 were driven by survey design and long-term demographic trends
+# Differences in contact survey design produce apparent structural changes in age-stratified contact patterns
 
-This data and code accompanies the journal article, 'Apparent structural changes in contact patterns during COVID-19 were driven by survey design and long-term demographic trends' by Harris et al.
+This data and code accompanies the journal article, 'Differences in contact survey design produce apparent structural changes in age-stratified contact patterns' by Harris et al.
 
 ## **File hierarchy**
 
@@ -18,9 +18,9 @@ This data and code accompanies the journal article, 'Apparent structural changes
 
 -   Output:
 
-    -   'output_similarity.csv': contact matrix comparison results from Kullback-Liebler (KL) divergence test
+    -   'output_similarity.csv': contact matrix comparison results from Kullback-Liebler (KL) divergence test (figure 1)
 
-    -   'output_cluster.csv': clustering results for KL comparison over set of surveys
+    -   'output_cluster.csv': clustering results for KL comparison over set of surveys (figure 1)
 
     -   Re-scaled per capita contact matrices: per capita contact matrices for each survey compared in analysis
 
@@ -30,12 +30,20 @@ This data and code accompanies the journal article, 'Apparent structural changes
 
     -   Robustness tables: robustness of clustering process for different number of clusters and nearest neighbor settings
 
+    -   Age densities: parent/child age probability densities (generated from 'Age specific fetility.ipynb')
+
+    -   Reclustering: clustering results under different assumptions relating to filtering of contacts and re-processing of contact/participant ages
+
 
 -   'contact-matrix-analysis.R': main analysis script
 
     -   Reads in processed survey data from Data folder
     -   Constructs contact matrices using socialmixr methods
     -   Compares contact matrices using defined measures of similarity - KL divergence
+
+-   'contact-matrix-analysis-filtering-SIR.R': additional analysis script
+
+    -   Same as 'contact-matrix-analysis.R' with additional features for filtering matrices and inputting matrices into age-structured SIR model
 
 -   'process-surveys.R': script for pre-processing survey data
 
@@ -48,6 +56,10 @@ This data and code accompanies the journal article, 'Apparent structural changes
 -   'UK analysis.R': script for generating contact matrices derived from UK CoMix and POLYMOD survey, filtered on location for both surveys and stringency index & contact type (group/individual) for just CoMix survey
 
 -   'process_other_surveys.ipynb': ipython notebook for splitting China (2020) & Zimbabwe contact surveys on survey site and time of survey
+
+-   'process-surveys_UK_POLYMOD.R': script for re-assigning ages in UK POLYMOD survey under different assumptions
+
+-   'Age specific fertility.ipynb': ipython notebook for generating parent/child age densities
 
 -   'filter-on-stringency-index.ipynb': script for filtering UK CoMix survey on stringency index associated with each survey day
 

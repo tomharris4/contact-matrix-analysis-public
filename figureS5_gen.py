@@ -2,126 +2,129 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import csv
-import matplotlib.ticker as tkr
 
-# Read in school contact matrices split on intervention stringency 
-comix_school_weakest_in = {}
+# Total number of contact surveys
+total = 32
 
-with open('Output/UK case study/comix_school_weakest.csv', newline='\n') as csvfile:
-    reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+# Country names
+countryX = []
+
+# Read in cluster assignments
+cluster_overall_in = []
+
+with open('Output/Reclustering/output_cluster_work_ind.csv', newline='\n') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     reader.__next__()
     for row in reader:
-        comix_school_weakest_in[row[0]] = [float(h) for h in row[1:]]
+        cluster_overall_in.append(int(row[2]))
+        countryX.append(row[1])
 
-comix_school_weakest = pd.DataFrame(comix_school_weakest_in, index=list(comix_school_weakest_in.keys()))
 
-comix_school_weak_in = {}
 
-with open('Output/UK case study/comix_school_weak.csv', newline='\n') as csvfile:
-    reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
+cluster_overall = pd.DataFrame(cluster_overall_in, columns=['cluster'])
+
+cluster_overall['country'] = countryX
+
+cluster_overall = cluster_overall.set_index('country')
+
+#Number of clusters=3
+cluster_map = {cluster_overall['cluster'].get('United Kingdom (P)'): 1, 
+               cluster_overall['cluster'].get('United Kingdom (C)'): 2,
+               cluster_overall['cluster'].get('China (Shanghai), 2018'): 3}
+
+
+
+cluster_overall['cluster'] = [cluster_map[h] for h in cluster_overall['cluster']]
+
+countryX = [countryX[c] + ' [' + str(cluster_overall['cluster'][c]) + ']' for c in range(0,len(countryX))]
+
+
+cluster_overall['country'] = countryX
+
+cluster_overall = cluster_overall.set_index('country')
+
+# Read in similarity values
+sim = []
+
+with open('Output/Reclustering/output_similarity_work_ind.csv', newline='\n') as csvfile:
+    reader = csv.reader(csvfile, delimiter=',', quotechar='"')
     reader.__next__()
     for row in reader:
-        comix_school_weak_in[row[0]] = [float(h) for h in row[1:]]
-
-comix_school_weak = pd.DataFrame(comix_school_weak_in, index=list(comix_school_weak_in.keys()))
-
-comix_school_strong_in = {}
-
-with open('Output/UK case study/comix_school_strong.csv', newline='\n') as csvfile:
-    reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
-    reader.__next__()
-    for row in reader:
-        comix_school_strong_in[row[0]] = [float(h) for h in row[1:]]
-
-comix_school_strong = pd.DataFrame(comix_school_strong_in, index=list(comix_school_strong_in.keys()))
+        sim.append(float(row[3]))
 
 
-comix_school_strongest_in = {}
+sim = [sim[i:i + total] for i in range(0, len(sim), total)]
 
-with open('Output/UK case study/comix_school_strongest.csv', newline='\n') as csvfile:
-    reader = csv.reader(csvfile, delimiter='\t', quotechar='"')
-    reader.__next__()
-    for row in reader:
-        comix_school_strongest_in[row[0]] = [float(h) for h in row[1:]]
+sim_overall = pd.DataFrame(sim, index = countryX, columns = countryX)
 
-comix_school_strongest = pd.DataFrame(comix_school_strongest_in, index=list(comix_school_strongest_in.keys()))
 
-# Plot each contact matrix as separate heatmaps in a grid
-plt.rcParams.update({'font.size': 14})
+# Reorder clusters for within-group similarity
 
-fig, axs = plt.subplots(ncols=2, nrows=2, dpi=400, figsize=[15,11.25])
+country_wg_sim = []
 
-matrix_max = max([h for j in range(len(comix_school_weakest.values)) for h in comix_school_weakest.values[j]] + 
-               [h for j in range(len(comix_school_weak.values)) for h in comix_school_weak.values[j]] +
-               [h for j in range(len(comix_school_strong.values)) for h in comix_school_strong.values[j]] + 
-               [h for j in range(len(comix_school_strongest.values)) for h in comix_school_strongest.values[j]])
+for i in countryX:
+    groupi = cluster_overall['cluster'].get(i)
 
-major_ticks = list(range(0,16,2))
-minor_ticks = list(range(1,14,2))
-tick_labels = [str(h) for h in range(0,75,10)]
+    wg_sim = 0
+    
+    for j in countryX:
+        groupj = cluster_overall['cluster'].get(j)
 
-formatter = tkr.ScalarFormatter(useMathText=True, useOffset=False)
-formatter.set_scientific(True)
-formatter.set_powerlimits((0, 0))
+        if (groupi == groupj):
+            wg_sim += sim_overall[j].get(i)
+    
+    country_wg_sim.append(wg_sim)
 
-sns.heatmap(comix_school_weakest, cmap="YlGnBu", cbar_kws={"format": formatter}, vmin=0, vmax = matrix_max, ax=axs[0][0]).invert_yaxis()
-axs[0][0].set_title('STRINGENCY:\n less than 40',weight="bold", fontsize='large')
-axs[0][0].set_yticks(ticks=major_ticks)
-axs[0][0].set_yticks(ticks=minor_ticks, minor=True)
-axs[0][0].set_yticklabels(tick_labels)
-axs[0][0].set_xticks(ticks=major_ticks)
-axs[0][0].set_xticks(ticks=minor_ticks, minor=True)
-axs[0][0].tick_params(axis='both', which='major', labelsize=18)
-cbar = axs[0][0].collections[0].colorbar
-cbar.set_label(label='Contact rate (rescaled)', fontsize=18)
-cbar.ax.tick_params(labelsize=18)
-cbar.ax.yaxis.offsetText.set_fontsize(18)
+cluster_overall['wg_sim'] = country_wg_sim
 
-sns.heatmap(comix_school_strong, cmap="YlGnBu", cbar_kws={"format": formatter}, vmin=0, vmax = matrix_max, ax=axs[1][0]).invert_yaxis()
-axs[1][0].set_title('STRINGENCY:\n 55-70',weight="bold", fontsize='large')
-axs[1][0].set_yticks(ticks=major_ticks)
-axs[1][0].set_yticks(ticks=minor_ticks, minor=True)
-axs[1][0].set_yticklabels(tick_labels)
-axs[1][0].set_xticks(ticks=major_ticks)
-axs[1][0].set_xticks(ticks=minor_ticks, minor=True)
-axs[1][0].set_xticklabels(tick_labels)
-axs[1][0].tick_params(axis='both', which='major', labelsize=18)
-cbar = axs[1][0].collections[0].colorbar
-cbar.set_label(label='Contact rate (rescaled)', fontsize=18)
-cbar.ax.tick_params(labelsize=18)
-cbar.ax.yaxis.offsetText.set_fontsize(18)
 
-sns.heatmap(comix_school_weak, cmap="YlGnBu", cbar_kws={"format": formatter}, vmin=0, vmax = matrix_max, ax=axs[0][1]).invert_yaxis()
-axs[0][1].set_title('STRINGENCY:\n 40-55',weight="bold", fontsize='large')
-axs[0][1].set_yticks(ticks=major_ticks)
-axs[0][1].set_yticks(ticks=minor_ticks, minor=True)
-axs[0][1].set_xticks(ticks=major_ticks)
-axs[0][1].set_xticks(ticks=minor_ticks, minor=True)
-axs[0][1].tick_params(axis='both', which='major', labelsize=18)
-cbar = axs[0][1].collections[0].colorbar
-cbar.set_label(label='Contact rate (rescaled)', fontsize=18)
-cbar.ax.tick_params(labelsize=18)
-cbar.ax.yaxis.offsetText.set_fontsize(18)
+cluster_overall = cluster_overall.sort_values(by=['cluster','wg_sim'])
 
-sns.heatmap(comix_school_strongest, cmap="YlGnBu", cbar_kws={"format": formatter}, vmin=0, vmax = matrix_max, ax=axs[1][1]).invert_yaxis()
-axs[1][1].set_title('STRINGENCY:\n greater than 70',weight="bold", fontsize='large')
-axs[1][1].set_yticks(ticks=major_ticks)
-axs[1][1].set_yticks(ticks=minor_ticks, minor=True)
-axs[1][1].set_xticks(ticks=major_ticks)
-axs[1][1].set_xticks(ticks=minor_ticks, minor=True)
-axs[1][1].set_xticklabels(tick_labels)
-axs[1][1].tick_params(axis='both', which='major', labelsize=18)
-cbar = axs[1][1].collections[0].colorbar
-cbar.set_label(label='Contact rate (rescaled)', fontsize=18)
-cbar.ax.tick_params(labelsize=18)
-cbar.ax.yaxis.offsetText.set_fontsize(18)
+col_reorder = list(cluster_overall.index)
 
-axs[0][0].text(-2,15.5,'a)', weight='bold', fontsize='large')
-axs[0][1].text(-2,15.5,'b)', weight='bold', fontsize='large')
-axs[1][0].text(-2,15.5,'c)', weight='bold', fontsize='large')
-axs[1][1].text(-2,15.5,'d)', weight='bold', fontsize='large')
 
-axs[1][1].text(-11,-3.25,'Age of Participant (years)', weight='bold', fontsize='x-large')
-axs[0][0].text(-3.25,-8.5,'Age of Contact (years)', weight='bold', fontsize='x-large',rotation=90)
+sim_overall = sim_overall[col_reorder]
 
-plt.savefig('Supplement figure stringency school.pdf')
+
+sim_overall = sim_overall.reindex(col_reorder)
+
+# Plot heatmap
+
+sns.set(font_scale=1.5)
+fig = plt.figure(figsize=[15,12])
+axs = plt.axes()
+
+
+
+sns.heatmap(sim_overall, cmap="YlGnBu",  ax=axs).invert_yaxis()
+
+cbar = axs.collections[0].colorbar
+cbar.set_label('Distance (KL divergence)',rotation=270,labelpad=20, fontsize=20)
+cbar.ax.tick_params(labelsize=20)
+
+
+g1 = 8
+g2 = 18
+g3 = 6
+
+# group 1
+axs.axhline(0.05, xmin=0, xmax=g1/total,linestyle='-', color='red')
+axs.axhline(g1, xmin=0, xmax=g1/total,linestyle='-', color='red')
+axs.axvline(0.05, ymin=0, ymax=g1/total,linestyle='-', color='red')
+axs.axvline(g1, ymin=0, ymax=g1/total,linestyle='-', color='red')
+
+# group 2
+axs.axhline(g1, xmin=g1/total, xmax=(g1+g2)/total,linestyle='-', color='red')
+axs.axhline(g1+g2, xmin=g1/total, xmax=(g1+g2)/total,linestyle='-', color='red')
+axs.axvline(g1, ymin=g1/total, ymax=(g1+g2)/total,linestyle='-', color='red')
+axs.axvline(g1+g2, ymin=g1/total, ymax=(g1+g2)/total,linestyle='-', color='red')
+
+# group 3
+axs.axhline(g1+g2, xmin=(g1+g2)/total, xmax=((g1+g2+g3)/total),linestyle='-', color='red')
+axs.axhline(g1+g2+g3-0.025, xmin=(g1+g2)/total, xmax=((g1+g2+g3)/total),linestyle='-', color='red')
+axs.axvline(g1+g2, ymin=(g1+g2)/total, ymax=((g1+g2+g3)/total),linestyle='-', color='red')
+axs.axvline(g1+g2+g3-0.025, ymin=(g1+g2)/total, ymax=((g1+g2+g3)/total),linestyle='-', color='red')
+
+
+plt.tight_layout()
+plt.savefig('Figure S5.pdf')
