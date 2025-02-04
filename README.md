@@ -1,6 +1,6 @@
-# Differences in contact survey design produce apparent structural changes in age-stratified contact patterns
+# Untangling the contribution of survey design and demographic change to observed differences in age-stratified contact patterns
 
-This data and code accompanies the journal article, 'Differences in contact survey design produce apparent structural changes in age-stratified contact patterns' by Harris et al.
+This data and code accompanies the journal article, 'Untangling the contribution of survey design and demographic change to observed differences in age-stratified contact patterns' by Harris et al.
 
 ## **File hierarchy**
 
